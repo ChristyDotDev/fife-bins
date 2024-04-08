@@ -1,12 +1,29 @@
 require('dotenv').config()
 const axios = require('axios');
+const schedule = require('node-schedule');
 
 console.log(process.env.UPRN);
+console.log(process.env.HOME_ASSISTANT_URL);
+console.log(process.env.WEBHOOK_ID);
 
-getAuthorisation().then((authorisation) => {
-    getBinCollection(authorisation).then((binCollection) => {
+const cronSchedule = '0 8 * * *'; //every day at 8AM
 
-        console.log(binCollection);
+const job = schedule.scheduleJob(cronSchedule, function(){
+    getAuthorisation().then((authorisation) => {
+        getBinCollection(authorisation).then((binCollections) => {
+            console.log(binCollections);
+            binCollections.forEach(binCollection => {
+                const binDate = new Date(binCollection.date);
+                //add 8 hours to binDate since it's around 8AM when the bin is collected
+                binDate.setHours(binDate.getHours() + 8);
+                //check if tomorrow is the bin collection day
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 3);
+                if (binDate.getDate() === tomorrow.getDate() && binDate.getMonth() === tomorrow.getMonth() && binDate.getFullYear() === tomorrow.getFullYear()) {
+                    sendNotication(binCollection.type);
+                }
+            });
+        });
     });
 });
 
@@ -43,4 +60,15 @@ async function getBinCollection(authorisation) {
         }
     });
     return response.data.data.tab_collections;
+}
+
+async function sendNotication(binType) {
+    const message = "" + binType + " bin will be collected tomorrow";
+    const response = await axios.post(
+        `${process.env.HOME_ASSISTANT_URL}/api/webhook/${process.env.WEBHOOK_ID}`,
+        { message: message },
+        { headers: { 'Content-Type': 'application/json' } }
+    );
+    console.log("Notification sent: " + message);
+    console.log(response.data);
 }
