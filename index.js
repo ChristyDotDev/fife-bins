@@ -18,7 +18,7 @@ const job = schedule.scheduleJob(cronSchedule, function(){
                 binDate.setHours(binDate.getHours() + 8);
                 //check if tomorrow is the bin collection day
                 const tomorrow = new Date();
-                tomorrow.setDate(tomorrow.getDate() + 3);
+                tomorrow.setDate(tomorrow.getDate() + 1);
                 if (binDate.getDate() === tomorrow.getDate() && binDate.getMonth() === tomorrow.getMonth() && binDate.getFullYear() === tomorrow.getFullYear()) {
                     sendNotication(binCollection.type);
                 }
