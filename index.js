@@ -2,9 +2,6 @@ require('dotenv').config()
 const axios = require('axios');
 const schedule = require('node-schedule');
 
-console.log(process.env.UPRN);
-console.log(process.env.HOME_ASSISTANT_URL);
-console.log(process.env.WEBHOOK_ID);
 
 const cronSchedule = '0 8 * * *'; //every day at 8AM
 
