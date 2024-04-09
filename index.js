@@ -2,7 +2,6 @@ require('dotenv').config()
 const axios = require('axios');
 const schedule = require('node-schedule');
 
-
 const cronSchedule = '0 8 * * *'; //every day at 8AM
 
 const job = schedule.scheduleJob(cronSchedule, function(){
@@ -10,15 +9,10 @@ const job = schedule.scheduleJob(cronSchedule, function(){
         getBinCollection(authorisation).then((binCollections) => {
             console.log(binCollections);
             binCollections.forEach(binCollection => {
-                const binDate = new Date(binCollection.date);
-                //add 8 hours to binDate since it's around 8AM when the bin is collected
-                binDate.setHours(binDate.getHours() + 8);
-                //check if tomorrow is the bin collection day
-                const tomorrow = new Date();
-                tomorrow.setDate(tomorrow.getDate() + 1);
-                if (binDate.getDate() === tomorrow.getDate() && binDate.getMonth() === tomorrow.getMonth() && binDate.getFullYear() === tomorrow.getFullYear()) {
+                if (isTomorrow(binCollection.date)) {
                     sendNotication(binCollection.type);
                 }
+                
             });
         });
     });
@@ -61,11 +55,26 @@ async function getBinCollection(authorisation) {
 
 async function sendNotication(binType) {
     const message = "" + binType + " bin will be collected tomorrow";
-    const response = await axios.post(
+    await axios.post(
         `${process.env.HOME_ASSISTANT_URL}/api/webhook/${process.env.WEBHOOK_ID}`,
         { message: message },
         { headers: { 'Content-Type': 'application/json' } }
     );
     console.log("Notification sent: " + message);
-    console.log(response.data);
+}
+
+/**
+ * 
+ * @param binDate - date in format like 'Thursday, May 23, 2024'
+ * @returns boolean
+ */
+function isTomorrow(binDate) {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    //add 8 hours to binDate since it's around 8AM when the bin is collected
+    const binDate = new Date(binDate);
+    binDate.setHours(binDate.getHours() + 8);
+    
+    return binDate.getDate() === tomorrow.getDate() && binDate.getMonth() === tomorrow.getMonth() && binDate.getFullYear() === tomorrow.getFullYear();
 }
