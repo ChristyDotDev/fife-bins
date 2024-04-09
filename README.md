@@ -10,7 +10,10 @@ HOME_ASSISTANT_URL = http://homeassistant.whateverurl:8123
 WEBHOOK_ID = SOMEWEBHOOK_ID
 ```
 UPRN is your unique property reference number, you can find this on the API request made after you select your address on https://www.fife.gov.uk/services/bin-calendar
-HOME_ASSISTANT_URL is the URL and port of your Home Assistant instances, WEBHOOK_ID is the ID of the webhook automation you've created in HA (below)
+
+HOME_ASSISTANT_URL is the URL and port of your Home Assistant instances
+
+WEBHOOK_ID is the ID of the webhook automation you've created in HA (below)
 
 ## Home Assistant Webhook
 
